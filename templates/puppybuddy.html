@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poor+Story&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="http://kenwheeler.github.io/slick/slick/slick.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.0.js"
+        integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='puppy.css') }}">
+
+</head>
+
+<body>
+    <script>
+        function fnMove(seq) {
+            var offset = $("#div" + seq).offset();
+            $('html, body').animate({ scrollTop: offset.top }, 400);
+        }
+    </script>
+
+    <script>
+// 미세먼지 api (GET)
+
+        $.ajax({
+            url: "http://openapi.seoul.go.kr:8088/6d4d776b466c656533356a4b4b5872/json/RealtimeCityAir/1/99",
+            type: "GET",
+            data: {},
+            success: function (res) {
+                let array = res.RealtimeCityAir["row"];
+                console.log(array);
+                for (let i = 0; i < array.length; i++) {
+                    let result = array[i];
+                    let name_gu = result["MSRSTE_NM"];
+                    let index_gu = result["IDEX_MVL"];
+                    let index = result["IDEX_NM"];
+                    console.log(name_gu + ' : ' + index + ' (수치: ' + index_gu + ')');
+
+                    $(function () {
+                        $('#btn-select').click(function () {
+                            let name = $('#inputGroupSelect04').val();
+                            let temp = '<p>\
+                            '+ name_gu + '  :   ' + index + '  (수치: ' + index_gu + ' )\
+                                        </p>'
+
+                            if (name === name_gu) {
+                                $('.dust_info').append(temp);
+                                return;
+                            }
+
+                        });
+                    });
+                }
+            }
+
+        });
+
+
+// Q.   날씨 그림 아래에 <div class="card-body">에 openwhethermap api에서 받아온 날씨정보를 카드에 붙이고 싶은데 웹페이지에선 안나타납니다.
+// 날씨 그림 아래에 카드정보는 안뜨고 바로 강아지등록 박스가 떠요.
+// ajax를 아래꺼만 써서 html페이지를 만들어보면 카드에 정보가 나타나는데, 다른 ajax(미세먼지GET, 강아지정보 불러오기GET)를 같이 붙이면 안되더라구요. GET 형식이 또 있어서 충돌되는건가요?
+
+
+// 서울날씨 openwhether api (GET)
+        $.ajax({
+            url: "http://api.openweathermap.org/data/2.5/weather?q=Seoul&appid=ab502ada83dcfe8fa5bc44143195b83a&lang=kr",
+            // dataType: "json",
+            // type: "GET",
+            // async: "false",
+            type: "GET",
+            data: {},
+            success: function (res) {
+                console.log(res);
+                var temp = res.main.temp - 273.15;
+                var humidity = res.main.humidity;
+                var weather_desc = res.weather[0].description;
+                var windv = res.wind.speed;
+                var cloud = res.clouds.all + "%";
+                var icon = res.weather[0].icon;
+
+                make_card(weather_desc, temp, humidity, windv, cloud);
+
+
+                if (icon == '01n' || icon == '01d') {
+                    $('.box-clear').show();
+                    return;
+                } else if (icon == '02d' || icon == '02n') {
+                    $('.box-mostlysunny').show();
+                    return;
+                } else if (icon == '03d' || icon == '03n' || icon == '04d' || icon == '04n') {
+                    $('.box-cloudy').show();
+                    return;
+                } else if (icon == '09d' || icon == '09n' || icon == '10d' || icon == '10n') {
+                    $('.box-rain').show();
+                    return;
+                } else if (icon == '11n' || icon == '11d') {
+                    $('.box-tstorms').show();
+                    return;
+                } else if (icon == '13n' || icon == '13d') {
+                    $('.box-snow').show();
+                    return;
+                } else if (icon == '50n' || icon == '50d') {
+                    $('.box-fog').show();
+                    return;
+                }
+
+            }
+        });
+
+
+// 서울날씨 api 정보불러와서 카드만들기
+        function make_card(a, b, c, d, e) {
+
+            let temp_html = '<div class="card-body">\
+            <blockquote class="blockquote mb-0">\
+                <p class="weather-info">\
+                현재 ? '+ a + '<br>\
+                기온 : '+ Math.ceil(b) + ' °C <br>\
+                습도 : '+ c + ' % <br>\
+                풍속 : '+ d + ' m/s <br>\
+                구름 : '+ e + '<br>\
+                </p>\
+            </blockquote>\
+        </div>'
+
+            $('.card-body').append(temp_html);
+
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            list_info();
+
+        });
+
+    // 강아지정보 등록 입력안했을때 alert & focus
+        function enroll_info() {
+            let name = $('#buddy-name').val();
+            let age = $('#buddy-age').val();
+            let breed = $('#buddy-breed').val();
+            let charm = $('#buddy-charm').val();
+            let location = $('#buddy-where').val();
+            let start = $('#buddy-time-start').val();
+            let finish = $('#buddy-time-finish').val();
+
+            if (name == '') {
+                alert('강아지이름을 입력해주세요');
+                $('#buddy-name').focus();
+                return;
+            } else if (age == '') {
+                alert('강아지나이를 입력해주세요');
+                $('#buddy-age').focus();
+                return;
+            } else if (breed == '') {
+                alert('견종을 입력해주세요');
+                $('#buddy-breed').focus();
+                return;
+            } else if (charm == '') {
+                alert('특징을 입력해주세요')
+                $('#buddy-charm').focus();
+                return;
+            } else if (location == '') {
+                alert('산책장소를 입력해주세요')
+                $('#buddy-where').focus();
+                return;
+            } else if (start == '') {
+                alert('산책시작 시간을 선택해주세요')
+                $('#buddy-time-start').focus();
+                return;
+            } else if (finish == '') {
+                alert('산책종료 시간을 선택해주세요')
+                $('#buddy-time-finish').focus();
+                return;
+            }
+
+// 강아지정보 입력하면 db 저장시키기(POST)
+            $.ajax({
+                type: "POST",
+                url: "/enroll",
+                data: { name_give: name, age_give: age, breed_give: breed, charm_give: charm, location_give: location, start_give: start, finish_give: finish },
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert('등록되었습니다');
+                        $('#buddy-name').val('');
+                        $('#buddy-age').val('');
+                        $('#buddy-breed').val('');
+                        $('#buddy-charm').val('');
+                        $('#buddy-where').val('');
+                        $('#buddy-time-start').val('');
+                        $('#buddy-time-finish').val('');
+                        window.location.reload();
+                    }
+                }
+            })
+        }
+
+
+//  db에 저장된 강아지정보 불러오기(GET)
+        function list_info() {
+
+            $.ajax({
+                type: "GET",
+                url: "/enroll",
+                data: {},
+                success: function (response) {
+                    console.log(response['buddy']);
+                    let result = response['buddy'];
+
+                    for (let i = 0; i < result.length; i++) {
+                        let array = result[i];
+                        console.log(array);
+
+                        make_card(array['이름'], array['나이'], array['견종'], array['산책장소'], array['특징'], array['산책시작'], array['산책종료']);
+
+                    }
+
+                }
+
+            })
+        }
+
+
+// Q. 강아지정보 등록시키고 db에서 불러올때, 한 열에 4개의 카드가 생기는 bootstrap card-group 형식을 이용했는데요. 
+// 4개가 초과했을때도 아래에 새로운 열에 4개씩 카드가 만들어졌으면 좋겠는데, 계속 같은열에 카드가 5,6,7...이렇게 붙어서 생기더라구요. 이건 해결방법이 없을까요?
+
+        function make_card(name, age, breed, location, charm, start, finish) {
+            // let temp_html = '<tr>\
+            //                     <td>'+ name + '</td>\
+            //                     <td>'+ age + '</td>\
+            //                     <td>'+ breed + '</td>\
+            //                     <td>'+ charm + '</td>\
+            //                     <td>'+ location + '</td>\
+            //                     <td>'+ start + '</td>\
+            //                     <td>'+ finish + '</td>\
+            //                 </tr>';
+
+
+            let temp = '<div class="card">\
+            <img class="card-img-top" src="https://i.pinimg.com/564x/2e/e6/17/2ee617828efd7aa9ecb678d6e895834d.jpg"\
+            alt="Card image cap">\
+            <div class="card-body">\
+            <p class="card-text">\
+                        이름 : '+ name + '<br>\
+                        나이 :'+ age + '<br>\
+                        견종 : '+ breed + '<br>\
+                        특징 : '+ charm + '<br>\
+                        산책장소 : '+ location + '<br>\
+                        산책시작 :'+ start + ' 시 <br>\
+                        산책종료 : '+ finish + ' 시<br>\
+                    </p>\
+                </div>\
+                </div>\
+        </div>'
+
+            $('.card-group').append(temp);
+        }
+
+
+    </script>
+
+
+
+    <img src="https://i.pinimg.com/564x/b0/ba/f0/b0baf0f73fc017a060ce4fd807da5b59.jpg" alt="green-leaf-pexels"
+        class="background">
+    <h1>PUPPY BUDDY</h1>
+    <h2>강아지 산책 친구를 찾아보세요 멍!</h2>
+
+    <div class="pill">
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab"
+                    aria-controls="pills-home" aria-selected="true">오늘의 날씨</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab"
+                    aria-controls="pills-profile" aria-selected="false">산책친구 찾기</a>
+            </li>
+
+        </ul>
+    </div>
+    <div class="content">
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                오늘의 미세먼지와 날씨를 알아보고 산책하기 좋은 날인지 보여줍니다.
+                <button style="background-color:#fe743d" onclick="fnMove('1')">GO</button>
+            </div>
+            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                지금 산책을 하고 있는 강아지 친구들을 보여줍니다. 산책 장소에 대한 사진과 정보를 알아볼 수도 있어요.
+                <button style="background-color:#fe743d" onclick="fnMove('2')">GO</button>
+            </div>
+        </div>
+    </div>
+
+    </div>
+    </div>
+
+    <div id="div1">
+
+        <div class="dust-box">
+            <div class="input-group">
+                <select class="custom-select" id="inputGroupSelect04">
+                    <option value="" selected>--알고싶은 지역을 선택해주세요--</option>
+                    <option value="중구">중구</option>
+                    <option value="종로구">종로구</option>
+                    <option value="용산구">용산구</option>
+                    <option value="은평구">은평구</option>
+                    <option value="서대문구">서대문구</option>
+                    <option value="마포구">마포구</option>
+                    <option value="광진구">광진구</option>
+                    <option value="성동구">성동구</option>
+                    <option value="중랑구">중랑구</option>
+                    <option value="동대문구">동대문구</option>
+                    <option value="성북구">성북구</option>
+                    <option value="도봉구">도봉구</option>
+                    <option value="강북구">강북구</option>
+                    <option value="노원구">노원구</option>
+                    <option value="강서구">강서구</option>
+                    <option value="구로구">구로구</option>
+                    <option value="영등포구">영등포구</option>
+                    <option value="동작구">동작구</option>
+                    <option value="관악구">관악구</option>
+                    <option value="금천구">금천구</option>
+                    <option value="양천구">양천구</option>
+                    <option value="강남구">강남구</option>
+                    <option value="서초구">서초구</option>
+                    <option value="송파구">송파구</option>
+                    <option value="강동구">강동구</option>
+                </select>
+            </div>
+            <br>
+            <button id='btn-select'>미세먼지 알고싶어요</button>
+            <div class="dust-content">
+                <p class="dust_info"></p>
+            </div>
+            <img src="https://i.pinimg.com/564x/c1/23/16/c123165bd2fd4fc1c2ad7ed788885c0b.jpg" alt="Lizzie-May Design">
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                오늘의 서울 날씨는?
+            </div>
+            <div class="card-body">
+                <blockquote class="blockquote mb-0">
+                </blockquote>
+            </div>
+        </div>
+
+
+<!-- 서울날씨 상태에 따라서 변경되는 CSS를 위한 div 들 -->
+        <div class="wheatherInfo">
+            <!--clear-->
+            <div class="box-clear">
+                <div class="clear-container">
+                    <div class="clear-total">
+                        <div class="weatherIcon">
+                            <div class="clear">
+                                <div class="inner">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--mostlysunny-->
+            <div class="box-mostlysunny">
+                <div class="mostlysunny-container">
+                    <div class="mostlysunny-total">
+                        <div class="weatherIcon">
+                            <div class="mostlysunny">
+                                <div class="inner">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--cloudy-->
+            <div class="box-cloudy">
+                <div class="cloudy-container">
+                    <div class="cloudy-total">
+                        <div class="weatherIcon">
+                            <div class="cloudy">
+                                <div class="inner">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--fog-->
+            <div class="box-fog">
+                <div class="fog-container">
+                    <div class="fog-total">
+                        <div class="weatherIcon">
+                            <div class="fog">
+                                <div class="inner">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--rain-->
+            <div class="box-rain">
+                <div class="rain-container">
+                    <div class="rain-total">
+                        <div class="weatherIcon">
+                            <div class="rain">
+                                <div class="inner">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--tstorms-->
+            <div class="box-tstorms">
+                <div class="tstorms-container">
+                    <div class="tstorms-total">
+                        <div class="weatherIcon">
+                            <div class="tstorms">
+                                <div class="inner">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--snow-->
+            <div class="box-snow">
+                <div class="snow-container">
+                    <div class="snow-total">
+                        <div class="weatherIcon">
+                            <div class="snow">
+                                <div class="inner">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="div2">
+        </div>
+
+
+
+        <div class="card text-center" style=" width:700px; margin:auto; top:10px;">
+            <div class="card-header">
+                <h3>산책할 강아지의 정보를 입력해주세요 멍!</h3>
+            </div>
+            <div class="card-body">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">강아지 이름</span>
+                    </div>
+                    <input type="text" class="form-control" id="buddy-name" aria-describedby="basic-addon3">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">강아지 나이</span>
+                    </div>
+                    <input type="text" class="form-control" id="buddy-age" aria-describedby="basic-addon3">
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3" style="width:71px;">견종</span>
+                    </div>
+                    <input type="text" class="form-control" id="buddy-breed" aria-describedby="basic-addon3">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">강아지 특징</span>
+                    </div>
+                    <input type="text" class="form-control" id="buddy-charm" aria-describedby="basic-addon3">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">산책장소</span>
+                    </div>
+                    <input type="text" class="form-control" id="buddy-where" aria-describedby="basic-addon3">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="inputGroupSelect01">산책 시작시간</label>
+                    </div>
+                    <select class="buddy-when-start" id="buddy-time-start" style="width:351px;">
+                        <option selected="" value=""> -- 시작시간을 선택해주세요 -- </option>
+                        <option value="00">00</option>
+                        <option value="01">01</option>
+                        <option value="02">02</option>
+                        <option value="03">03</option>
+                        <option value="04">04</option>
+                        <option value="05">05</option>
+                        <option value="06">06</option>
+                        <option value="07">07</option>
+                        <option value="08">08</option>
+                        <option value="09">09</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                    </select>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="inputGroupSelect01">산책 종료시간</label>
+                    </div>
+                    <select class="buddy-when-finish" id="buddy-time-finish" style="width:351px;">
+                        <option selected="" value=""> -- 종료시간을 선택해주세요 -- </option>
+                        <option value="00">00</option>
+                        <option value="01">01</option>
+                        <option value="02">02</option>
+                        <option value="03">03</option>
+                        <option value="04">04</option>
+                        <option value="05">05</option>
+                        <option value="06">06</option>
+                        <option value="07">07</option>
+                        <option value="08">08</option>
+                        <option value="09">09</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                    </select>
+                </div>
+
+                <div class="buddy-enroll">
+                    <button onclick="enroll_info()" type="button" class="btn btn-primary">강아지 등록하기</button>
+                </div>
+
+            </div>
+            <div class="card-footer text-muted">
+                오늘 산책할 강아지의 정보를 등록해서 친구들에게 알려줍니다.<br>
+                장소와 시간을 고려해서 다른 친구들을 만나보아요.
+            </div>
+        </div>
+
+        <div class="buddy-card" style="margin-top:20px;">
+            <div class="card-group">
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+
+
+
+
+
+</html>
