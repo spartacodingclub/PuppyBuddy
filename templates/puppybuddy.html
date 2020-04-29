@@ -97,26 +97,104 @@
 
                 weather_card(weather_desc, temp, humidity, windv, cloud);
 
+
                 if (icon == '01n' || icon == '01d') {
-                    $('.box-clear').show();
+                    let clear = '<div class="box-clear">\
+                        <div class="clear-container">\
+                            <div class="clear-total">\
+                                <div class="weatherIcon">\
+                                    <div class="clear">\
+                                        <div class="inner"></div>\
+                                    </div>\
+                                </div>\
+                            </div>\
+                        </div>\
+                    </div>'
+                    $('#weatherInfo').append(clear);
                     return;
                 } else if (icon == '02d' || icon == '02n') {
-                    $('.box-mostlysunny').show();
+                    let mostlysunny = '<div class="box-mostlysunny">\
+                <div class="mostlysunny-container">\
+                    <div class="mostlysunny-total">\
+                        <div class="weatherIcon">\
+                            <div class="mostlysunny">\
+                                <div class="inner"></div>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>'
+                    $('#weatherInfo').append(mostlysunny);
                     return;
                 } else if (icon == '03d' || icon == '03n' || icon == '04d' || icon == '04n') {
-                    $('.box-cloudy').show();
+                    let cloudy = '<div class="box-cloudy">\
+                <div class="cloudy-container">\
+                    <div class="cloudy-total">\
+                        <div class="weatherIcon">\
+                            <div class="cloudy">\
+                                <div class="inner"></div>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>'
+                    $('#weatherInfo').append(cloudy);
                     return;
                 } else if (icon == '09d' || icon == '09n' || icon == '10d' || icon == '10n') {
-                    $('.box-rain').show();
+                    let rain = '<div class="box-rain">\
+                <div class="rain-container">\
+                    <div class="rain-total">\
+                        <div class="weatherIcon">\
+                            <div class="rain">\
+                                <div class="inner"></div>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>'
+                    $('#weatherInfo').append(rain);
                     return;
                 } else if (icon == '11n' || icon == '11d') {
-                    $('.box-tstorms').show();
+                    let tstorms = '<div class="box-tstorms">\
+                <div class="tstorms-container">\
+                    <div class="tstorms-total">\
+                        <div class="weatherIcon">\
+                            <div class="tstorms">\
+                                <div class="inner"></div>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>'
+                    $('#weatherInfo').append(tstorms);
                     return;
                 } else if (icon == '13n' || icon == '13d') {
-                    $('.box-snow').show();
+                    let snow = '<div class="box-snow">\
+                <div class="snow-container">\
+                    <div class="snow-total">\
+                        <div class="weatherIcon">\
+                            <div class="snow">\
+                                <div class="inner"></div>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>'
+                    $('#weatherInfo').append(snow);
                     return;
                 } else if (icon == '50n' || icon == '50d') {
-                    $('.box-fog').show();
+                    let fog = '<div class="box-fog">\
+                <div class="fog-container">\
+                    <div class="fog-total">\
+                        <div class="weatherIcon">\
+                            <div class="fog">\
+                                <div class="inner"></div>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>'
+                    $('#weatherInfo').append(fog);
                     return;
                 }
 
@@ -373,84 +451,6 @@
     </div>
 
     <div id="weatherInfo">
-        <div class="box-clear">
-            <div class="clear-container">
-                <div class="clear-total">
-                    <div class="weatherIcon">
-                        <div class="clear">
-                            <div class="inner"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    <div class="box-mostlysunny">
-    <div class="mostlysunny-container">
-        <div class="mostlysunny-total">
-            <div class="weatherIcon">
-                <div class="mostlysunny">
-                    <div class="inner"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="box-cloudy">
-    <div class="cloudy-container">
-        <div class="cloudy-total">
-            <div class="weatherIcon">
-                <div class="cloudy">
-                    <div class="inner"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="box-rain">
-    <div class="rain-container">
-        <div class="rain-total">
-            <div class="weatherIcon">
-                <div class="rain">
-                    <div class="inner"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="box-tstorms">
-    <div class="tstorms-container">
-        <div class="tstorms-total">
-            <div class="weatherIcon">
-                <div class="tstorms">
-                    <div class="inner"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="box-snow">
-    <div class="snow-container">
-        <div class="snow-total">
-            <div class="weatherIcon">
-                <div class="snow">
-                    <div class="inner"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="box-fog">
-    <div class="fog-container">
-        <div class="fog-total">
-            <div class="weatherIcon">
-                <div class="fog">
-                    <div class="inner"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
     </div>
     <div class="jumbotron jumbotron-fluid"
         style="width:500px; text-align:center; margin:auto; background-color:#86b9e0;">
