@@ -22,6 +22,8 @@
     <script type="text/javascript" src="http://kenwheeler.github.io/slick/slick/slick.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.0.js"
         integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.0.js"
+        integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='puppy.css') }}">
 
 </head>
@@ -34,9 +36,17 @@
         }
     </script>
 
-    <script>
-// 미세먼지 api (GET)
 
+    <script>
+        $(".hover").mouseleave(
+            function () {
+                $('.snip1273').removeClass("hover");
+            }
+        );
+
+    </script>
+    <script>
+        // 미세먼지 api (GET)
         $.ajax({
             url: "http://openapi.seoul.go.kr:8088/6d4d776b466c656533356a4b4b5872/json/RealtimeCityAir/1/99",
             type: "GET",
@@ -71,17 +81,9 @@
         });
 
 
-// Q.   날씨 그림 아래에 <div class="card-body">에 openwhethermap api에서 받아온 날씨정보를 카드에 붙이고 싶은데 웹페이지에선 안나타납니다.
-// 날씨 그림 아래에 카드정보는 안뜨고 바로 강아지등록 박스가 떠요.
-// ajax를 아래꺼만 써서 html페이지를 만들어보면 카드에 정보가 나타나는데, 다른 ajax(미세먼지GET, 강아지정보 불러오기GET)를 같이 붙이면 안되더라구요. GET 형식이 또 있어서 충돌되는건가요?
-
-
-// 서울날씨 openwhether api (GET)
+        // 서울날씨 openwhether api (GET)
         $.ajax({
             url: "http://api.openweathermap.org/data/2.5/weather?q=Seoul&appid=ab502ada83dcfe8fa5bc44143195b83a&lang=kr",
-            // dataType: "json",
-            // type: "GET",
-            // async: "false",
             type: "GET",
             data: {},
             success: function (res) {
@@ -93,8 +95,7 @@
                 var cloud = res.clouds.all + "%";
                 var icon = res.weather[0].icon;
 
-                make_card(weather_desc, temp, humidity, windv, cloud);
-
+                weather_card(weather_desc, temp, humidity, windv, cloud);
 
                 if (icon == '01n' || icon == '01d') {
                     $('.box-clear').show();
@@ -123,23 +124,39 @@
         });
 
 
-// 서울날씨 api 정보불러와서 카드만들기
-        function make_card(a, b, c, d, e) {
 
-            let temp_html = '<div class="card-body">\
-            <blockquote class="blockquote mb-0">\
-                <p class="weather-info">\
+
+        // 서울날씨 api 정보불러와서 카드만들기
+        function weather_card(a, b, c, d, e) {
+
+            let temp_html = '<p class="weather-info" style="color:white;">\
                 현재 ? '+ a + '<br>\
                 기온 : '+ Math.ceil(b) + ' °C <br>\
                 습도 : '+ c + ' % <br>\
                 풍속 : '+ d + ' m/s <br>\
                 구름 : '+ e + '<br>\
-                </p>\
-            </blockquote>\
-        </div>'
+                </p>'
 
-            $('.card-body').append(temp_html);
+            $('.container').append(temp_html);
 
+        }
+    </script>
+    <script>
+        let start = $('#buddy-time-start').val();
+        let finish = $('#buddy-time-finish').val();
+
+        for (let q = 0; q < 25; q++) {
+            var c = [q];
+            for (let i = 0; i < 1; i++) {
+                if (c[i] < 10) {
+                    start = 0 + c[i];
+                    finish = 0 + c[i];
+                } else {
+                    start = c[i];
+                    finish = c[i];
+                }
+
+            }
         }
     </script>
 
@@ -149,7 +166,7 @@
 
         });
 
-    // 강아지정보 등록 입력안했을때 alert & focus
+        // 강아지정보 등록 입력안했을때 alert & focus
         function enroll_info() {
             let name = $('#buddy-name').val();
             let age = $('#buddy-age').val();
@@ -189,7 +206,7 @@
                 return;
             }
 
-// 강아지정보 입력하면 db 저장시키기(POST)
+            // 강아지정보 입력하면 db 저장시키기(POST)
             $.ajax({
                 type: "POST",
                 url: "/enroll",
@@ -211,7 +228,7 @@
         }
 
 
-//  db에 저장된 강아지정보 불러오기(GET)
+        //  db에 저장된 강아지정보 불러오기(GET)
         function list_info() {
 
             $.ajax({
@@ -236,44 +253,35 @@
         }
 
 
-// Q. 강아지정보 등록시키고 db에서 불러올때, 한 열에 4개의 카드가 생기는 bootstrap card-group 형식을 이용했는데요. 
-// 4개가 초과했을때도 아래에 새로운 열에 4개씩 카드가 만들어졌으면 좋겠는데, 계속 같은열에 카드가 5,6,7...이렇게 붙어서 생기더라구요. 이건 해결방법이 없을까요?
-
         function make_card(name, age, breed, location, charm, start, finish) {
-            // let temp_html = '<tr>\
-            //                     <td>'+ name + '</td>\
-            //                     <td>'+ age + '</td>\
-            //                     <td>'+ breed + '</td>\
-            //                     <td>'+ charm + '</td>\
-            //                     <td>'+ location + '</td>\
-            //                     <td>'+ start + '</td>\
-            //                     <td>'+ finish + '</td>\
-            //                 </tr>';
+            let temp = '<div class="col mb-4">\
+                <div class="card">\
+                <div class="snip1273" style="text-align:center; margin:auto;">\
+                <img src="https://i.pinimg.com/564x/df/fc/75/dffc752f0bd627325e2b65b1426a64a5.jpg" class="card-img-top" style="text-align:center; margin:auto;">\
+                <div class="card-body" style="text-align:center; margin:auto;">\
+                <p class="card-text" style="text-align:center">\
+                    이름 : '+ name + '<br>\
+                    나이 :'+ age + '<br>\
+                    견종 : '+ breed + '<br>\
+                    특징 : '+ charm + '<br>\
+                    산책장소 : '+ location + '<br>\
+                    산책시작 :'+ start + ' 시 <br>\
+                    산책종료 : '+ finish + ' 시<br>\
+                </p>\
+                <figcaption>\
+                <p>클릭시 산책장소 정보페이지로 이동합니다.</p>\
+                </figcaption>\
+                <a href="https://www.google.com/search?q= '+ location + '"></a>\
+            </div>\
+        </div>\
+        </div>\
+    </div>'
 
-
-            let temp = '<div class="card">\
-            <img class="card-img-top" src="https://i.pinimg.com/564x/2e/e6/17/2ee617828efd7aa9ecb678d6e895834d.jpg"\
-            alt="Card image cap">\
-            <div class="card-body">\
-            <p class="card-text">\
-                        이름 : '+ name + '<br>\
-                        나이 :'+ age + '<br>\
-                        견종 : '+ breed + '<br>\
-                        특징 : '+ charm + '<br>\
-                        산책장소 : '+ location + '<br>\
-                        산책시작 :'+ start + ' 시 <br>\
-                        산책종료 : '+ finish + ' 시<br>\
-                    </p>\
-                </div>\
-                </div>\
-        </div>'
-
-            $('.card-group').append(temp);
+            $('.row-cols-md-2').append(temp);
         }
 
 
     </script>
-
 
 
     <img src="https://i.pinimg.com/564x/b0/ba/f0/b0baf0f73fc017a060ce4fd807da5b59.jpg" alt="green-leaf-pexels"
@@ -297,12 +305,12 @@
     <div class="content">
         <div class="tab-content" id="pills-tabContent">
             <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-                오늘의 미세먼지와 날씨를 알아보고 산책하기 좋은 날인지 보여줍니다.
-                <button style="background-color:#fe743d" onclick="fnMove('1')">GO</button>
+                오늘의 미세먼지와 날씨를 알아보고 산책하기 좋은 날인지 알아봅니다.
+                <button style="background-color:#fba98f; color:#7b583f;" onclick="fnMove('1')">CLICK</button>
             </div>
             <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-                지금 산책을 하고 있는 강아지 친구들을 보여줍니다. 산책 장소에 대한 사진과 정보를 알아볼 수도 있어요.
-                <button style="background-color:#fe743d" onclick="fnMove('2')">GO</button>
+                지금 산책을 하고 있는 강아지 친구들을 보여줍니다. 산책 장소를 지도에서 확인해보세요.
+                <button style="background-color:#fba98f; color:#7b583f;" onclick="fnMove('2')">CLICK</button>
             </div>
         </div>
     </div>
@@ -310,9 +318,19 @@
     </div>
     </div>
 
+    <br>
+    <br>
+    <br>
+    <br>
+
     <div id="div1">
 
-        <div class="dust-box">
+        <div class="dust-box"
+            style="background-image: url(https://i.pinimg.com/564x/3f/5f/5c/3f5f5cb7bb5c4f5852dd7e4592fbb916.jpg);">
+            <p class="dustcontent">
+                <br>
+                <h4>오늘의 미세먼지는?</h4>
+            </p>
             <div class="input-group">
                 <select class="custom-select" id="inputGroupSelect04">
                     <option value="" selected>--알고싶은 지역을 선택해주세요--</option>
@@ -344,246 +362,288 @@
                 </select>
             </div>
             <br>
-            <button id='btn-select'>미세먼지 알고싶어요</button>
+            <button id='btn-select'>알고싶어요</button>
             <div class="dust-content">
+                <p class="dustcomment" style="color:#19694e; font-weight:bold;">계속 알아볼때마다 잎이 자라나요!</p>
                 <p class="dust_info"></p>
             </div>
             <img src="https://i.pinimg.com/564x/c1/23/16/c123165bd2fd4fc1c2ad7ed788885c0b.jpg" alt="Lizzie-May Design">
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                오늘의 서울 날씨는?
-            </div>
-            <div class="card-body">
-                <blockquote class="blockquote mb-0">
-                </blockquote>
-            </div>
-        </div>
+    </div>
 
-
-<!-- 서울날씨 상태에 따라서 변경되는 CSS를 위한 div 들 -->
-        <div class="wheatherInfo">
-            <!--clear-->
-            <div class="box-clear">
-                <div class="clear-container">
-                    <div class="clear-total">
-                        <div class="weatherIcon">
-                            <div class="clear">
-                                <div class="inner">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!--mostlysunny-->
-            <div class="box-mostlysunny">
-                <div class="mostlysunny-container">
-                    <div class="mostlysunny-total">
-                        <div class="weatherIcon">
-                            <div class="mostlysunny">
-                                <div class="inner">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!--cloudy-->
-            <div class="box-cloudy">
-                <div class="cloudy-container">
-                    <div class="cloudy-total">
-                        <div class="weatherIcon">
-                            <div class="cloudy">
-                                <div class="inner">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!--fog-->
-            <div class="box-fog">
-                <div class="fog-container">
-                    <div class="fog-total">
-                        <div class="weatherIcon">
-                            <div class="fog">
-                                <div class="inner">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!--rain-->
-            <div class="box-rain">
-                <div class="rain-container">
-                    <div class="rain-total">
-                        <div class="weatherIcon">
-                            <div class="rain">
-                                <div class="inner">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!--tstorms-->
-            <div class="box-tstorms">
-                <div class="tstorms-container">
-                    <div class="tstorms-total">
-                        <div class="weatherIcon">
-                            <div class="tstorms">
-                                <div class="inner">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!--snow-->
-            <div class="box-snow">
-                <div class="snow-container">
-                    <div class="snow-total">
-                        <div class="weatherIcon">
-                            <div class="snow">
-                                <div class="inner">
-                                </div>
-                            </div>
+    <div id="weatherInfo">
+        <div class="box-clear">
+            <div class="clear-container">
+                <div class="clear-total">
+                    <div class="weatherIcon">
+                        <div class="clear">
+                            <div class="inner"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-
-        <div id="div2">
+    <div class="box-mostlysunny">
+    <div class="mostlysunny-container">
+        <div class="mostlysunny-total">
+            <div class="weatherIcon">
+                <div class="mostlysunny">
+                    <div class="inner"></div>
+                </div>
+            </div>
         </div>
-
-
-
-        <div class="card text-center" style=" width:700px; margin:auto; top:10px;">
-            <div class="card-header">
-                <h3>산책할 강아지의 정보를 입력해주세요 멍!</h3>
+    </div>
+</div>
+<div class="box-cloudy">
+    <div class="cloudy-container">
+        <div class="cloudy-total">
+            <div class="weatherIcon">
+                <div class="cloudy">
+                    <div class="inner"></div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3">강아지 이름</span>
-                    </div>
-                    <input type="text" class="form-control" id="buddy-name" aria-describedby="basic-addon3">
+        </div>
+    </div>
+</div>
+<div class="box-rain">
+    <div class="rain-container">
+        <div class="rain-total">
+            <div class="weatherIcon">
+                <div class="rain">
+                    <div class="inner"></div>
                 </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3">강아지 나이</span>
-                    </div>
-                    <input type="text" class="form-control" id="buddy-age" aria-describedby="basic-addon3">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="box-tstorms">
+    <div class="tstorms-container">
+        <div class="tstorms-total">
+            <div class="weatherIcon">
+                <div class="tstorms">
+                    <div class="inner"></div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="box-snow">
+    <div class="snow-container">
+        <div class="snow-total">
+            <div class="weatherIcon">
+                <div class="snow">
+                    <div class="inner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="box-fog">
+    <div class="fog-container">
+        <div class="fog-total">
+            <div class="weatherIcon">
+                <div class="fog">
+                    <div class="inner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+    <div class="jumbotron jumbotron-fluid"
+        style="width:500px; text-align:center; margin:auto; background-color:#86b9e0;">
+        <div class="container">
+            <h5 class="display-4" style="color:white;">오늘의 서울 날씨는?</h5>
+            <p class="lead">
+            </p>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div id="div2">
+    </div>
 
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3" style="width:71px;">견종</span>
-                    </div>
-                    <input type="text" class="form-control" id="buddy-breed" aria-describedby="basic-addon3">
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3">강아지 특징</span>
-                    </div>
-                    <input type="text" class="form-control" id="buddy-charm" aria-describedby="basic-addon3">
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3">산책장소</span>
-                    </div>
-                    <input type="text" class="form-control" id="buddy-where" aria-describedby="basic-addon3">
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="inputGroupSelect01">산책 시작시간</label>
-                    </div>
-                    <select class="buddy-when-start" id="buddy-time-start" style="width:351px;">
-                        <option selected="" value=""> -- 시작시간을 선택해주세요 -- </option>
-                        <option value="00">00</option>
-                        <option value="01">01</option>
-                        <option value="02">02</option>
-                        <option value="03">03</option>
-                        <option value="04">04</option>
-                        <option value="05">05</option>
-                        <option value="06">06</option>
-                        <option value="07">07</option>
-                        <option value="08">08</option>
-                        <option value="09">09</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                        <option value="12">12</option>
-                        <option value="13">13</option>
-                        <option value="14">14</option>
-                        <option value="15">15</option>
-                        <option value="16">16</option>
-                        <option value="17">17</option>
-                        <option value="18">18</option>
-                        <option value="19">19</option>
-                        <option value="20">20</option>
-                        <option value="21">21</option>
-                        <option value="22">22</option>
-                        <option value="23">23</option>
-                        <option value="24">24</option>
-                    </select>
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="inputGroupSelect01">산책 종료시간</label>
-                    </div>
-                    <select class="buddy-when-finish" id="buddy-time-finish" style="width:351px;">
-                        <option selected="" value=""> -- 종료시간을 선택해주세요 -- </option>
-                        <option value="00">00</option>
-                        <option value="01">01</option>
-                        <option value="02">02</option>
-                        <option value="03">03</option>
-                        <option value="04">04</option>
-                        <option value="05">05</option>
-                        <option value="06">06</option>
-                        <option value="07">07</option>
-                        <option value="08">08</option>
-                        <option value="09">09</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                        <option value="12">12</option>
-                        <option value="13">13</option>
-                        <option value="14">14</option>
-                        <option value="15">15</option>
-                        <option value="16">16</option>
-                        <option value="17">17</option>
-                        <option value="18">18</option>
-                        <option value="19">19</option>
-                        <option value="20">20</option>
-                        <option value="21">21</option>
-                        <option value="22">22</option>
-                        <option value="23">23</option>
-                        <option value="24">24</option>
-                    </select>
-                </div>
+    <div class="card text-center" style=" width:700px; margin:auto; top:10px;">
+        <div class="card-header">
+            <h3 style="color:#c73947;">산책할 강아지의 정보를 입력해주세요 멍!</h3>
+        </div>
+        <img src="https://i.pinimg.com/564x/a1/13/93/a11393cea00e99305bf0c7776600c768.jpg" alt="dogs"
+            style="width:600px; margin:auto; text-align:center;">
 
-                <div class="buddy-enroll">
-                    <button onclick="enroll_info()" type="button" class="btn btn-primary">강아지 등록하기</button>
+        <div class="card-body">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3">강아지 이름</span>
                 </div>
+                <input type="text" class="form-control" id="buddy-name" aria-describedby="basic-addon3">
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3">강아지 나이</span>
+                </div>
+                <input type="text" class="form-control" id="buddy-age" aria-describedby="basic-addon3">
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3" style="width:71px;">견종</span>
+                </div>
+                <input type="text" class="form-control" id="buddy-breed" aria-describedby="basic-addon3">
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3">강아지 특징</span>
+                </div>
+                <input type="text" class="form-control" id="buddy-charm" aria-describedby="basic-addon3">
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3">산책장소</span>
+                </div>
+                <input type="text" class="form-control" id="buddy-where" aria-describedby="basic-addon3">
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelect01">산책 시작시간</label>
+                </div>
+                <select class="buddy-when-start" id="buddy-time-start" style="width:351px;">
+                    <option selected="" value=""> -- 시작시간을 선택해주세요 -- </option>
+                    <script>
+                        for (let q = 0; q < 25; q++) {
+                            var c = [q];
+                            for (let i = 0; i < 1; i++) {
+                                if (c[i] < 10) {
+                                    document.write("<option>" + 0 + c[i] + "</option>");
+                                } else {
+                                    document.write("<option>" + c[i] + "</option>");
+                                }
+
+                            }
+                        }
+                    </script>
+                </select>
+
 
             </div>
-            <div class="card-footer text-muted">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelect01">산책 종료시간</label>
+                </div>
+                <select class="buddy-when-finish" id="buddy-time-finish" style="width:351px;">
+                    <option selected="" value=""> -- 종료시간을 선택해주세요 -- </option>
+                    <script>
+                        for (let q = 0; q < 25; q++) {
+                            var c = [q];
+                            for (let i = 0; i < 1; i++) {
+                                if (c[i] < 10) {
+                                    document.write("<option>" + 0 + c[i] + "</option>");
+                                } else {
+                                    document.write("<option>" + c[i] + "</option>");
+                                }
+
+                            }
+                        }
+                    </script>
+                </select>
+            </div>
+
+            <div class="buddy-enroll">
+                <button onclick="enroll_info()" type="button" class="btn btn-primary"
+                    style="background-color:#e3bbb9;border-color: #bd2130;">강아지 등록하기</button>
+            </div>
+
+        </div>
+        <div class="card-footer text-muted">
+            <p class="cardenroll" style="color:#c73947;">
                 오늘 산책할 강아지의 정보를 등록해서 친구들에게 알려줍니다.<br>
-                장소와 시간을 고려해서 다른 친구들을 만나보아요.
-            </div>
+                장소와 시간을 고려해서 다른 친구들을 만나보아요.<br><br>
+                아래의 지도에서 강아지가 산책할 수 있는 장소들을 참고해보세요.
+            </p>
         </div>
+    </div>
+    <br>
+    <br>
+    <div id="map" style="width:750px;height:350px; margin:auto;"></div>
 
-        <div class="buddy-card" style="margin-top:20px;">
-            <div class="card-group">
-            </div>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=6b2ba95dbf3b432e162df1449dd905d7"></script>
+    <script>
+
+        var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+            mapOption = {
+                center: new kakao.maps.LatLng(37.542527, 127.084206), // 지도의 중심좌표
+                level: 6 // 지도의 확대 레벨
+            };
+
+
+        // 지도를 생성한다
+        var map = new kakao.maps.Map(mapContainer, mapOption);
+
+        // 마커를 표시할 위치와 내용을 가지고 있는 객체 배열입니다
+        var positions = [
+            {
+                content: '<div>광진구청 공원</div>',
+                latlng: new kakao.maps.LatLng(37.538729, 127.082366)
+            },
+            {
+                content: '<div>카페 연</div>',
+                latlng: new kakao.maps.LatLng(37.545781, 127.085743)
+            },
+            {
+                content: '<div>어린이대공원 반려견놀이터</div>',
+                latlng: new kakao.maps.LatLng(37.545399, 127.0847044)
+            },
+            {
+                content: '<div>안다즈커피</div>',
+                latlng: new kakao.maps.LatLng(37.550345, 127.089510)
+            }
+        ];
+
+        for (var i = 0; i < positions.length; i++) {
+            // 마커를 생성합니다
+            var marker = new kakao.maps.Marker({
+                map: map, // 마커를 표시할 지도
+                position: positions[i].latlng // 마커의 위치
+            });
+
+            // 마커에 표시할 인포윈도우를 생성합니다
+            var infowindow = new kakao.maps.InfoWindow({
+                content: positions[i].content // 인포윈도우에 표시할 내용
+            });
+
+            // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
+            // 이벤트 리스너로는 클로저를 만들어 등록합니다
+            // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
+            kakao.maps.event.addListener(marker, 'mouseover', makeOverListener(map, marker, infowindow));
+            kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
+        }
+
+        // 인포윈도우를 표시하는 클로저를 만드는 함수입니다
+        function makeOverListener(map, marker, infowindow) {
+            return function () {
+                infowindow.open(map, marker);
+            };
+        }
+
+        // 인포윈도우를 닫는 클로저를 만드는 함수입니다
+        function makeOutListener(infowindow) {
+            return function () {
+                infowindow.close();
+            };
+        }
+
+    </script>
+
+
+    <div class="buddy-card" style="margin-top:20px; text-align:center;">
+        <div class="row row-cols-1 row-cols-md-2">
         </div>
+    </div>
 
     </div>
 
